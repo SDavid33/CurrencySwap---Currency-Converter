@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CurrencySwap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap');
+
+  :root {
+    --bg: #0d0d10;
+    --surface: #16161c;
+    --surface2: #1e1e27;
+    --border: #2a2a38;
+    --accent: #f0c040;
+    --accent2: #5df5b0;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --danger: #ff5566;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 320px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a24 0%, #0d0d10 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 18px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(240,192,64,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0d0d10;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-left: 36px;
+  }
+
+  .rate-badge {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: rgba(93,245,176,0.12);
+    border: 1px solid rgba(93,245,176,0.3);
+    color: var(--accent2);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'Syne Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .rate-badge:hover { background: rgba(93,245,176,0.2); }
+  .rate-badge.loading { opacity: 0.5; }
+
+  .body { padding: 16px 18px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .currency-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .currency-select-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .currency-select-wrap::after {
+    content: 'v';
+    position: absolute;
+    right: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 11px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 28px 9px 12px;
+    border-radius: var(--radius);
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .arrow-icon {
+    color: var(--accent);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .source-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .toggle-row:hover { border-color: var(--accent); }
+  .toggle-row.last { margin-bottom: 14px; }
+
+  .toggle-label {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .toggle-desc {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+    line-height: 1.25;
+  }
+
+  .toggle {
+    width: 36px; height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.25s;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .toggle.on::after { left: 19px; }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 11px 0;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0d0d10;
+  }
+  .btn-primary:hover { background: #f8d060; transform: translateY(-1px); }
+  .btn-primary:active { transform: none; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .status-bar {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+  .status-bar.success {
+    background: rgba(93,245,176,0.08);
+    border-color: rgba(93,245,176,0.3);
+    color: var(--accent2);
+  }
+  .status-bar.error {
+    background: rgba(255,85,102,0.08);
+    border-color: rgba(255,85,102,0.3);
+    color: var(--danger);
+  }
+  .status-bar.info {
+    background: rgba(240,192,64,0.08);
+    border-color: rgba(240,192,64,0.3);
+    color: var(--accent);
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+
+  .quick-label { margin-bottom: 8px; }
+  .quick-pairs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .quick-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .footer {
+    padding: 8px 18px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-text {
+    font-size: 10px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">$</div>
+    <div class="logo-text">Currency<span>Swap</span></div>
+  </div>
+  <div class="subtitle">Currency conversion for any website</div>
+  <div class="rate-badge" id="rateBadge" title="Refresh exchange rates">LIVE</div>
+</div>
+
+<div class="body">
+  <div class="section-label">Conversion target</div>
+  <div class="currency-row">
+    <div class="source-tag" id="sourceTag">Page currency</div>
+    <div class="arrow-icon">-&gt;</div>
+    <div class="currency-select-wrap">
+      <select id="targetCurrency">
+        <option value="HUF">HUF - Hungarian Forint</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="USD">USD - US Dollar</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="CHF">CHF - Swiss Franc</option>
+        <option value="CZK">CZK - Czech Koruna</option>
+        <option value="PLN">PLN - Polish Zloty</option>
+        <option value="RON">RON - Romanian Leu</option>
+        <option value="SEK">SEK - Swedish Krona</option>
+        <option value="NOK">NOK - Norwegian Krone</option>
+        <option value="DKK">DKK - Danish Krone</option>
+        <option value="BGN">BGN - Bulgarian Lev</option>
+        <option value="RSD">RSD - Serbian Dinar</option>
+        <option value="UAH">UAH - Ukrainian Hryvnia</option>
+        <option value="ISK">ISK - Icelandic Krona</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CNY">CNY - Chinese Yuan</option>
+        <option value="KRW">KRW - South Korean Won</option>
+        <option value="TWD">TWD - New Taiwan Dollar</option>
+        <option value="HKD">HKD - Hong Kong Dollar</option>
+        <option value="SGD">SGD - Singapore Dollar</option>
+        <option value="THB">THB - Thai Baht</option>
+        <option value="PHP">PHP - Philippine Peso</option>
+        <option value="MYR">MYR - Malaysian Ringgit</option>
+        <option value="IDR">IDR - Indonesian Rupiah</option>
+        <option value="VND">VND - Vietnamese Dong</option>
+        <option value="INR">INR - Indian Rupee</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="NZD">NZD - New Zealand Dollar</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="BRL">BRL - Brazilian Real</option>
+        <option value="MXN">MXN - Mexican Peso</option>
+        <option value="ARS">ARS - Argentine Peso</option>
+        <option value="CLP">CLP - Chilean Peso</option>
+        <option value="COP">COP - Colombian Peso</option>
+        <option value="PEN">PEN - Peruvian Sol</option>
+        <option value="TRY">TRY - Turkish Lira</option>
+        <option value="RUB">RUB - Russian Ruble</option>
+        <option value="AED">AED - UAE Dirham</option>
+        <option value="SAR">SAR - Saudi Riyal</option>
+        <option value="QAR">QAR - Qatari Riyal</option>
+        <option value="ILS">ILS - Israeli New Shekel</option>
+        <option value="ZAR">ZAR - South African Rand</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="toggle-row" id="autoToggleRow">
+    <div>
+      <div class="toggle-label">Automatic conversion</div>
+      <div class="toggle-desc">Convert prices when pages load</div>
+    </div>
+    <div class="toggle" id="autoToggle"></div>
+  </div>
+
+  <div class="toggle-row last" id="oneClickToggleRow">
+    <div>
+      <div class="toggle-label">Convert on icon click</div>
+      <div class="toggle-desc">Left-click the toolbar icon to convert, click again to restore</div>
+    </div>
+    <div class="toggle" id="oneClickToggle"></div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" id="convertBtn">Convert</button>
+    <button class="btn btn-secondary" id="revertBtn" disabled>Restore</button>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="dot"></div>
+    <span id="statusText">Ready to convert</span>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label quick-label">Quick targets</div>
+  <div class="quick-pairs" id="quickPairs">
+    <button class="quick-btn" data-to="HUF">to HUF</button>
+    <button class="quick-btn" data-to="EUR">to EUR</button>
+    <button class="quick-btn" data-to="USD">to USD</button>
+    <button class="quick-btn" data-to="GBP">to GBP</button>
+    <button class="quick-btn" data-to="CHF">to CHF</button>
+    <button class="quick-btn" data-to="CZK">to CZK</button>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-text">Rates from open.er-api.com, refreshed hourly</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
